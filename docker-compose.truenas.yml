@@ -1,0 +1,40 @@
+services:
+  app:
+    image: ghcr.io/sw1tchwolf/whistleiq:latest   # update to your registry/image name after building
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://whistleiq:REPLACE_DB_PASSWORD@db:5432/whistleiq
+      AUTO_SYNC: "true"
+      SYNC_LOOKBACK_DAYS: 10
+      SYNC_MAX_GAMES: 20
+      SYNC_INTERVAL_MINUTES: 180
+      ADMIN_TOKEN: REPLACE_WITH_STRONG_TOKEN    # used for manual sync API calls
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - /mnt/POOL/appdata/whistleiq/data:/app/data
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: whistleiq
+      POSTGRES_USER: whistleiq
+      POSTGRES_PASSWORD: REPLACE_DB_PASSWORD     # must match DATABASE_URL above
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U whistleiq -d whistleiq"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - /mnt/POOL/appdata/whistleiq/postgres:/var/lib/postgresql/data

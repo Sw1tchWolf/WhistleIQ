@@ -1,0 +1,43 @@
+services:
+  app:
+    build:
+      context: .
+    image: nba-referee-analytics:latest
+    container_name: nba-referee-analytics
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://nba_ref_app:nba_ref_app@db:5432/nba_ref_analytics
+      AUTO_SYNC: "true"
+      SYNC_LOOKBACK_DAYS: 10
+      SYNC_MAX_GAMES: 20
+      SYNC_INTERVAL_MINUTES: 180
+      ADMIN_TOKEN: change-me
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+
+  db:
+    image: postgres:16-alpine
+    container_name: nba-referee-analytics-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: nba_ref_analytics
+      POSTGRES_USER: nba_ref_app
+      POSTGRES_PASSWORD: nba_ref_app
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nba_ref_app -d nba_ref_analytics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

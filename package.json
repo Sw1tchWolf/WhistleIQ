@@ -1,0 +1,16 @@
+{
+  "name": "nba-referee-analytics",
+  "version": "1.2",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "sync:live": "node scripts/sync-live-data.js",
+    "docker:up": "docker compose up --build",
+    "docker:down": "docker compose down"
+  },
+  "dependencies": {
+    "pg": "^8.20.0"
+  }
+}
