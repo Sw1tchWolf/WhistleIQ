@@ -1,4 +1,24 @@
+# Dependencies
 node_modules/
+
+# Environment & secrets
 .env
+.env.local
+.env.*.local
+
+# Runtime data
 data/liveData.json
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories
+.vscode/
+.idea/
+
+# Claude Code local config
 .claude/
